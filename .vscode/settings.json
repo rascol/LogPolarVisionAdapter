@@ -84,17 +84,22 @@
         "shared_mutex": "cpp",
         "span": "cpp",
         "unordered_set": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "chrono": "cpp",
+        "thread": "cpp"
     },
-    "python.defaultInterpreter": "/Users/ray/Desktop/LPXImage/lpximage-env/bin/python3",
-    "python.pythonPath": "/Users/ray/Desktop/LPXImage/lpximage-env/bin/python3",
-    "python.terminal.activateEnvironment": true,
+    "python.defaultInterpreter": "/opt/homebrew/bin/python3",
+    "python.pythonPath": "/opt/homebrew/bin/python3",
+    "python.terminal.activateEnvironment": false,
     "python.analysis.extraPaths": [
-        "/Users/ray/Desktop/LPXImage"
+        "${workspaceFolder}/build/python",
+        "${workspaceFolder}"
     ],
     "terminal.integrated.env.osx": {
-        "PATH": "/Users/ray/Desktop/LPXImage/lpximage-env/bin:${env:PATH}",
-        "PYTHONPATH": "/Users/ray/Desktop/LPXImage:${env:PYTHONPATH}"
+        "PATH": "/opt/homebrew/bin:${env:PATH}",
+        "PYTHONPATH": "${workspaceFolder}/build/python:${workspaceFolder}",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1"
     },
     "terminal.integrated.shellArgs.osx": [
         "-l"

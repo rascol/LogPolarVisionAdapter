@@ -50,6 +50,19 @@ test_*.py
 !test_color_fix.py
 !test_client_simple.py
 !test_optimized_client.py
+!validate_saccades/test_*.py
+!validate_lpxvision/test_*.py
 *.tmp
 *.bak
 *.orig
+
+# IDE / assistant local state
+.continue/
+
+# Node dependencies
+node_modules/
+
+# Compiled test binaries and debug symbols (validate_lpxvision)
+validate_lpxvision/test_lpxvision_format
+validate_lpxvision/test_lpxvision_format_debug
+validate_lpxvision/test_lpxvision_format_debug.dSYM/

@@ -82,6 +82,42 @@ else
 fi
 
 echo ""
+echo "=== Checking for site-packages pollution ==="
+# A stale pip install will silently win imports whenever a script forgets to
+# prepend the local build to sys.path. Detect it now, while we can still
+# tell the user how to fix it.
+POLLUTION=0
+
+if python3 -m pip show lpximage >/dev/null 2>&1; then
+    INSTALL_LOC=$(python3 -m pip show lpximage 2>/dev/null | awk -F': ' '/^Location:/ {print $2}')
+    echo "⚠️  lpximage is installed via pip at: $INSTALL_LOC"
+    POLLUTION=1
+fi
+
+# Import from a neutral cwd with PYTHONPATH unset — this is what a stray
+# `python3` invocation outside the project would see.
+STRAY=$(cd /tmp && env -u PYTHONPATH python3 -c "import lpximage, os; print(os.path.abspath(lpximage.__file__))" 2>/dev/null || true)
+if [ -n "$STRAY" ]; then
+    case "$STRAY" in
+        "$PROJECT_ROOT"/*) : ;;  # same tree — fine
+        *)
+            echo "⚠️  A stale lpximage is importable from outside the project: $STRAY"
+            POLLUTION=1
+            ;;
+    esac
+fi
+
+if [ "$POLLUTION" -eq 1 ]; then
+    echo ""
+    echo "    This will shadow your local build whenever a script forgets to"
+    echo "    configure sys.path. Remove it with:"
+    echo "        python3 -m pip uninstall lpximage"
+    echo "    (Repeat with --user or in each env if more than one copy is found.)"
+else
+    echo "✅ No stale lpximage found outside the project"
+fi
+
+echo ""
 echo "=== Installation Complete ==="
 echo "To use the libraries:"
 echo "1. C++ projects should link against: $PROJECT_ROOT/lib/liblpx_image.*"

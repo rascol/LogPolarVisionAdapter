@@ -1,0 +1,15 @@
+{
+  "name": "lpx-vision-ffi",
+  "version": "1.0.0",
+  "description": "FFI bridge for LPXVision C++ library",
+  "main": "lpx_vision.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "koffi": "^2.14.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

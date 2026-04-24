@@ -1,0 +1,14 @@
+#!/bin/bash
+# LPXImage Local Python Wrapper
+# This script runs python3 with the correct configuration for local development
+
+# Get the absolute path to the project directory
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Set environment for local development
+export PYTHONPATH="${PROJECT_DIR}/build/python:${PROJECT_DIR}"
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONNOUSERSITE=1
+
+# Execute python3 with -S flag to skip site-packages and forward all arguments
+exec python3 -S "$@"
