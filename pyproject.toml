@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lpx_adapter"
+version = "0.0.1"
+description = "Log-polar vision adapter: LPXVision retinaCells -> LLM features"
+authors = [{name = "Raymond Connell", email = "rayconnell@usa.net"}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "torch>=2.2",
+    "accelerate>=0.28",
+    "transformers>=4.40",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
+
+# This project ships the Python-native adapter package only. The C++ lpximage
+# extension is built separately via install_local.sh; it is not installed by
+# `pip install .`.
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["lpx_adapter*"]
