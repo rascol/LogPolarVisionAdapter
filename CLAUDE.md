@@ -77,7 +77,7 @@ When in doubt about whether a task is "fix the library" vs. "build the adapter,"
 cd build && make -j$(sysctl -n hw.ncpu)
 ```
 
-`install_local.sh` runs cmake with `CMAKE_INSTALL_PREFIX=<project root>`, builds the C++ shared library, builds the pybind11 module, and copies `lpximage.cpython-*.so` to the project root. Dependencies come from Homebrew on macOS (`brew install cmake opencv python@3.13`).
+`install_local.sh` runs cmake with `CMAKE_INSTALL_PREFIX=<project root>`, builds the C++ shared library, builds the pybind11 module, copies `lpximage.cpython-*.so` to the project root, and symlinks `liblpx_image.1.dylib` (and a `.dylib` alias) from `lib/` into the project root so the Python `.so`'s `@loader_path` RPATH resolves without manual intervention. Dependencies come from Homebrew on macOS (`brew install cmake opencv python@3.14`).
 
 ### Python path — the #1 footgun
 
@@ -139,7 +139,7 @@ The scan tables (`ScanTables63` in the repo root, binary format) are the fixed m
 
 `lpx_vision::LPXVision` takes an `LPXImage` and computes per-cell **retinaCells** — 24-bit packed identifiers with 8 × 3-bit components: `mwh` (luminance), `hue`, and six gradient fields (x/y/z × luminance/hue) derived from hexagonal-cell opponent-process color. A "view" is 151 retinaCells covering ~7 spiral revolutions (spiral period 21.5 cells/rev). This is a `friend class` of `LPXImage` to reach private color accumulators — see `include/lpx_image.h:139`.
 
-**Known broken:** `LPXVision` compiles, links, and works from C++, but `'LPXVision' in dir(lpximage)` returns False — the pybind11 registration silently fails. `LPXVISION_INTEGRATION.md` documents this and `PLAN.md` milestone M1.1 treats fixing it as Gate 0 for the adapter project. Don't assume the Python binding for this class works.
+**Python binding works** (cleared 2026-04-24, PLAN.md Gate 0). `'LPXVision' in dir(lpximage)` is True; `LPXVision(scanned_lpximage)` and its `spiralPer` / `viewlength` / `retinaCells` / `getCellIdentifierName()` members all behave. The historical "silent pybind11 registration failure" reported in earlier notes was misdiagnosed — the real cause was `lpximage` failing to `dlopen` at all (OpenCV/OpenEXR Homebrew drift, stale root dylib, or Python ABI mismatch). A clean `install_local.sh` against the current Homebrew stack resolves it. The binding code at `python/lpx_bindings.cpp:217-239` is fine.
 
 ### Saccades
 
