@@ -1,6 +1,6 @@
 # Log-Polar Vision Adapter — Project Plan
 
-**Status:** Draft v0.5 · Architect: Claude Opus · Editor: Nemotron-3-Super-120B-A12B (MLX, MXFP4) via LM Studio · Tool: aider (architect mode)
+**Status:** Draft v0.6 · Architect: Claude Opus · Editor: Nemotron-3-Super-120B-A12B (MLX, MXFP4) via LM Studio · Tool: aider (architect mode)
 
 *v0.2 changes: patch-based tokenization promoted from open question to the resolved v1 design; token-count gates restated in patches; discrete scale-invariance made explicit.*
 
@@ -9,6 +9,8 @@
 *v0.4 changes: patches constructed in spiral order (foveal → peripheral, row-major fill within each patch). Encoder options in §3 re-sorted: 1D conv or MLP are the natural fit for spiral-ordered patches; 2D conv is demoted to conditional (only useful with snake-order fill).*
 
 *v0.5 changes: simplified to 1D patches (1×25 or 1×30). Rationale: (1) the LLM doesn't care about the encoder's internal structure — the patch encoder is ~4 orders of magnitude cheaper than one LLM forward pass, so 2D-vs-1D has zero impact on training or inference speed; (2) in 1D, **both** kinds of local correlation — angular adjacency (consecutive cells, 1 apart) and radial adjacency (same angle, one revolution apart, ~21 cells apart) — are simple 1D distances that a wide-receptive-field encoder sees naturally. A 2D row-major reshape actively hides the radial correlation at an awkward diagonal offset. 2D encoders demoted from first-class to optional-M1.4-experiment status.*
+
+*v0.6 changes: §8 adapter paths updated from flat `src/{adapter,training,data,eval}/` to nested `src/lpx_adapter/{adapter,training,data,eval}/` to match the M1.2 scaffolding. Rationale recorded in `DESIGN.md` §5: nested src-layout is installable via `pip install -e .`, avoids `PYTHONPATH` hacks that plagued `lpximage`, and prevents collision between flat top-level names (`training`, `data`) and common pip-installable packages.*
 
 ---
 
@@ -107,10 +109,11 @@ Any gate failure triggers a review in `DESIGN.md`: what changed, what we'd revis
 - **`PLAN.md`** (this file): phases, gates, risks. Stable. Edits require explicit rationale.
 - **`DESIGN.md`** (to be created in M1.4): the chosen adapter topology, hyperparameters, and *why* — including what was tried and rejected. Living document.
 - **`CONVENTIONS.md`** (to be created before first aider session): engineering rules — Python version, style, test contracts, git hygiene. Loaded by aider every architect turn.
-- **`src/adapter/`**: model code.
-- **`src/training/`**: loss, loop, schedulers.
-- **`src/data/`**: dataloaders and augmentation.
-- **`src/eval/`**: benchmarks and scale-invariance probes.
+- **`src/lpx_adapter/adapter/`**: model code.
+- **`src/lpx_adapter/training/`**: loss, loop, schedulers.
+- **`src/lpx_adapter/data/`**: dataloaders and augmentation.
+- **`src/lpx_adapter/eval/`**: benchmarks and scale-invariance probes.
+- **`pyproject.toml`**: nested src-layout installable via `pip install -e .`. The C++ `lpximage` extension is outside pip's scope; build it separately via `install_local.sh`.
 - **`experiments/YYYY-MM-DD-<name>/`**: one directory per training run, with config, logs, and a short `result.md`.
 
 ## 9. Known unknowns flagged for the first architect session
