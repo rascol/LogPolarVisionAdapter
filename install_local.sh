@@ -55,8 +55,14 @@ if ls $PYTHON_MODULE 1> /dev/null 2>&1; then
     # Copy to project root for easy access
     cp $PYTHON_MODULE "$PROJECT_ROOT/"
     echo "Python module copied to project root."
-    
-    # Libraries stay in lib/ directory - RPATH will find them automatically
+
+    # The Python .so uses @loader_path RPATH, so liblpx_image.1.dylib must sit
+    # next to it in the project root. Symlink to lib/ rather than copying so
+    # there's one source of truth and future rebuilds can't leave a stale copy.
+    ln -sf lib/liblpx_image.1.dylib "$PROJECT_ROOT/liblpx_image.1.dylib"
+    ln -sf liblpx_image.1.dylib "$PROJECT_ROOT/liblpx_image.dylib"
+    echo "Root dylib symlinks refreshed:"
+    ls -la "$PROJECT_ROOT/liblpx_image"*.dylib
 else
     echo "Warning: Python module not found"
 fi

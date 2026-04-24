@@ -38,16 +38,18 @@ The LPXVision class is **fully functional at the C++ level** using friend class 
 - ✅ **Gradient Detection**: Multi-directional gradient processing for hexagonal cells
 - ✅ **Moving Statistics**: Full moving min/max calculations for dynamic range adaptation
 
-### Python Bindings Issue (Technical Detail)
-The LPXVision class is **not currently accessible from Python** due to a pybind11 registration issue. The C++ code compiles and links correctly, but the Python bindings are not being exposed.
+### Python Bindings Status
+The LPXVision class is **accessible from Python** as of 2026-04-24. The pybind11 registration at `python/lpx_bindings.cpp:217-239` works correctly:
 
-**Symptoms:**
 ```python
 import lpximage
-print('LPXVision' in dir(lpximage))  # Returns False
+print('LPXVision' in dir(lpximage))  # True
+# Instantiation, properties, and methods all work:
+#   v = lpximage.LPXVision(scanned_lpximage)
+#   v.spiralPer, v.viewlength, v.retinaCells, v.getCellIdentifierName(i)
 ```
 
-**Root Cause:** The pybind11 binding registration may be encountering a silent failure during module initialization.
+**Historical note:** earlier sessions reported `'LPXVision' in dir(lpximage) == False` and blamed pybind11. The real cause was that `lpximage` was failing to `dlopen` at all — usually from OpenCV/OpenEXR Homebrew drift, a stale `liblpx_image.1.dylib` in the project root, or an ABI mismatch between the built `.so` and the active Python interpreter. A clean rebuild against the current Homebrew stack resolves it; the bindings themselves were never broken.
 
 ## Usage from C++
 
@@ -89,7 +91,7 @@ for (int i = 0; i < 8; i++) {
 
 ### Configuration
 - Updated `CMakeLists.txt` to include LPXVision sources in build
-- Updated Python bindings in `python/lpx_bindings.cpp` (partially working)
+- Updated Python bindings in `python/lpx_bindings.cpp`
 
 ## Project Impact
 
@@ -105,11 +107,6 @@ for (int i = 0; i < 8; i++) {
 - Python module maintains all existing classes and functions
 
 ## Next Steps
-
-### To Fix Python Bindings
-1. **Debug pybind11 registration**: Investigate type compatibility between `lpx::LPXImage*` and the binding
-2. **Simplify constructor**: Create alternative constructor that doesn't require LPXImage parameter
-3. **Type bridging**: Add proper type conversion between Python LPXImage objects and C++ LPXVision
 
 ### To Complete Full JavaScript Port
 1. **Enhanced cell processing**: Port complete JavaScript vision cell algorithms
@@ -152,12 +149,10 @@ python test_lpx_vision.py
 
 **Expected Results:**
 - ✅ Basic imports work
-- ❌ LPXVision class creation fails (Python binding issue)
-- ❌ LPXVision utilities fail (Python binding issue) 
+- ✅ LPXVision class creation works from Python
+- ✅ LPXVision utilities (`vision_utils` submodule) available
 - ✅ LPXImage integration works in C++
 
 ## Conclusion
 
-The LPXVision integration is **functionally complete at the C++ level** and ready for use. The Python binding issue is a technical detail that can be resolved with additional pybind11 debugging, but it doesn't prevent the core functionality from being available for C++ applications or future development.
-
-This integration successfully adds retina cell vision processing capabilities to the LPXImage project with minimal bloat and no breaking changes to existing functionality.
+The LPXVision integration is **functionally complete at both the C++ and Python levels**. Retina cell vision processing is available to C++ applications and to Python scripts via `import lpximage`, with no breaking changes to existing functionality.
